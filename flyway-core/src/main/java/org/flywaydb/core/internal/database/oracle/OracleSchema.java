@@ -315,25 +315,18 @@ public class OracleSchema extends Schema<OracleDatabase, OracleTable> {
 
                 // Reference partitioned tables should be dropped in child-to-parent order.
                 if (referencePartitionedTablesExist) {
-                    tablesQuery.append("  LEFT JOIN ALL_PART_TABLES pt\n" +
-                            "    ON t.OWNER = pt.OWNER\n" +
-                            "   AND t.TABLE_NAME = pt.TABLE_NAME\n" +
-                            "   AND pt.PARTITIONING_TYPE = 'REFERENCE'\n" +
-                            "  LEFT JOIN ALL_CONSTRAINTS fk\n" +
-                            "    ON pt.OWNER = fk.OWNER\n" +
-                            "   AND pt.TABLE_NAME = fk.TABLE_NAME\n" +
-                            "   AND pt.REF_PTN_CONSTRAINT_NAME = fk.CONSTRAINT_NAME\n" +
-                            "   AND fk.CONSTRAINT_TYPE = 'R'\n" +
-                            "  LEFT JOIN ALL_CONSTRAINTS puk\n" +
-                            "    ON fk.R_OWNER = puk.OWNER\n" +
-                            "   AND fk.R_CONSTRAINT_NAME = puk.CONSTRAINT_NAME\n" +
-                            "   AND puk.CONSTRAINT_TYPE IN ('P', 'U')\n" +
-                            "  LEFT JOIN TABLES p\n" +
-                            "    ON puk.OWNER = p.OWNER\n" +
-                            "   AND puk.TABLE_NAME = p.TABLE_NAME\n" +
-                            "START WITH p.TABLE_NAME IS NULL\n" +
-                            "CONNECT BY PRIOR t.TABLE_NAME = p.TABLE_NAME\n" +
-                            "ORDER BY LEVEL DESC");
+                    tablesQuery.append("         LEFT JOIN ALL_CONSTRAINTS fk\n" +
+                            "                   ON t.OWNER = fk.OWNER\n" +
+                            "                       AND t.TABLE_NAME = fk.TABLE_NAME\n" +
+                            "                       AND fk.CONSTRAINT_TYPE = 'R'\n" +
+                            "         LEFT JOIN ALL_CONSTRAINTS puk\n" +
+                            "                   ON fk.R_OWNER = puk.OWNER\n" +
+                            "                       AND fk.R_CONSTRAINT_NAME = puk.CONSTRAINT_NAME\n" +
+                            "                       AND puk.CONSTRAINT_TYPE IN ('P', 'U')\n" +
+                            "START WITH puk.TABLE_NAME IS NULL OR t.TABLE_NAME = puk.TABLE_NAME\n" +
+                            "CONNECT BY NOCYCLE PRIOR t.TABLE_NAME = puk.TABLE_NAME\n" +
+                            "group by t.TABLE_NAME\n" +
+                            "ORDER BY MAX(LEVEL) DESC");
                 }
 
                 int n = 1 + (xmlDbAvailable ? 1 : 0);
