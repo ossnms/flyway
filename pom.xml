@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.flywaydb</groupId>
     <artifactId>flyway-parent</artifactId>
-    <version>7.7.3-ossnms-01</version>
+    <version>7.7.3-ossnms-02-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <description>Flyway: Database Migrations Made Easy.</description>
@@ -51,7 +51,7 @@
 
 
 
-        <tag>flyway-parent-7.7.3-ossnms-01</tag>
+        <tag>HEAD</tag>
     </scm>
     <developers>
         <developer>
