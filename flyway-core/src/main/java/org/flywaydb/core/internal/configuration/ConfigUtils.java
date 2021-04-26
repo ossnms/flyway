@@ -89,6 +89,7 @@ public class ConfigUtils {
     public static final String VALIDATE_ON_MIGRATE = "flyway.validateOnMigrate";
     public static final String VALIDATE_MIGRATION_NAMING = "flyway.validateMigrationNaming";
     public static final String CREATE_SCHEMAS = "flyway.createSchemas";
+    public static final String IGNORE_PAST_AFTER_MIGRATION_KEY = "flyway.ignorePastAfterMigration";
 
     // Secrets-manager specific
     public static final String VAULT_URL = "flyway.vault.url";
@@ -292,6 +293,9 @@ public class ConfigUtils {
         }
         if ("FLYWAY_CREATE_SCHEMAS".equals(key)) {
             return CREATE_SCHEMAS;
+        }
+        if ("FLYWAY_IGNORE_PAST_AFTER_MIGRATION".equals(key)) {
+            return IGNORE_PAST_AFTER_MIGRATION_KEY;
         }
 
         // Oracle-specific

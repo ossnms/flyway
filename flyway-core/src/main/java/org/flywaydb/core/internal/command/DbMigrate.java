@@ -36,11 +36,15 @@ import org.flywaydb.core.internal.database.base.Schema;
 import org.flywaydb.core.internal.info.MigrationInfoImpl;
 import org.flywaydb.core.internal.info.MigrationInfoServiceImpl;
 import org.flywaydb.core.internal.jdbc.ExecutionTemplateFactory;
+import org.flywaydb.core.internal.schemahistory.AppliedMigration;
+import org.flywaydb.core.internal.schemahistory.AppliedMigrationExtensions;
 import org.flywaydb.core.internal.schemahistory.SchemaHistory;
 import org.flywaydb.core.internal.util.ExceptionUtils;
 import org.flywaydb.core.internal.util.StopWatch;
 import org.flywaydb.core.internal.util.StringUtils;
 import org.flywaydb.core.internal.util.TimeFormat;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -151,6 +155,10 @@ public class DbMigrate {
                     // For all regular cases, proceed with the migration as usual.
                     migrateAll();
 
+            if (configuration.isIgnorePastAfterMigration()) {
+                markLastMigrationAsIgnorePast();
+            }
+
             stopWatch.stop();
 
             migrateResult.targetSchemaVersion = getTargetVersion();
@@ -208,6 +216,47 @@ public class DbMigrate {
 
         return total;
     }
+
+    private void markLastMigrationAsIgnorePast() {
+        MigrationInfoServiceImpl infoService =
+                new MigrationInfoServiceImpl(migrationResolver, schemaHistory, database, configuration,
+                        configuration.getTarget(), configuration.isOutOfOrder(), configuration.getCherryPick(),
+                        true, true, true, true);
+        infoService.refresh();
+
+        final MigrationInfo current = infoService.current();
+
+        if (current != null) {
+            final MigrationInfoImpl migrationInfo = (MigrationInfoImpl) current;
+
+            final AppliedMigration appliedMigration = migrationInfo.getAppliedMigration();
+
+            JSONObject jsonObject = appliedMigration.getExtensionObject();
+            try {
+                jsonObject = new JSONObject(appliedMigration.getExtensionObject(), JSONObject.getNames(appliedMigration.getExtensionObject()));
+                jsonObject.putOpt(AppliedMigrationExtensions.IGNORE_PAST.getKey(), Boolean.TRUE.toString());
+            } catch (JSONException e) {
+                //IGNORE
+            }
+
+            final AppliedMigration newAppliedMigrtation = new AppliedMigration(appliedMigration.getInstalledRank(),
+                    appliedMigration.getVersion(),
+                    jsonObject,
+                    appliedMigration.getType(),
+                    appliedMigration.getScript(),
+                    appliedMigration.getChecksum(),
+                    appliedMigration.getInstalledOn(),
+                    appliedMigration.getInstalledBy(),
+                    appliedMigration.getExecutionTime(),
+                    appliedMigration.isSuccess()
+            );
+
+            schemaHistory.update(newAppliedMigrtation, migrationInfo.getResolvedMigration());
+        }
+
+
+    }
+
 
     /**
      * Migrate a group of one (group = false) or more (group = true) migrations.
@@ -345,7 +394,7 @@ public class DbMigrate {
 
                 stopWatch.stop();
                 int executionTime = (int) stopWatch.getTotalTimeMillis();
-                schemaHistory.addAppliedMigration(migration.getVersion(), migration.getDescription(),
+                schemaHistory.addAppliedMigration(migration.getVersion(), migration.getExtension(),
                         migration.getType(), migration.getScript(), migration.getResolvedMigration().getChecksum(), executionTime, false);
             }
             throw e;
@@ -442,7 +491,7 @@ public class DbMigrate {
 
             migrateResult.migrations.add(CommandResultFactory.createMigrateOutput(migration, executionTime));
 
-            schemaHistory.addAppliedMigration(migration.getVersion(), migration.getDescription(), migration.getType(),
+            schemaHistory.addAppliedMigration(migration.getVersion(), migration.getExtension(), migration.getType(),
                     migration.getScript(), migration.getResolvedMigration().getChecksum(), executionTime, true);
         }
     }

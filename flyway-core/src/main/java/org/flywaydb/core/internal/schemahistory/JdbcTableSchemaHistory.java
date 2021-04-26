@@ -35,6 +35,8 @@ import org.flywaydb.core.internal.jdbc.RowMapper;
 import org.flywaydb.core.internal.jdbc.ExecutionTemplateFactory;
 import org.flywaydb.core.internal.sqlscript.SqlScriptExecutorFactory;
 import org.flywaydb.core.internal.sqlscript.SqlScriptFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -219,7 +221,7 @@ class JdbcTableSchemaHistory extends SchemaHistory {
                     return new AppliedMigration(
                             rs.getInt(columnOrdinalMap.get("installed_rank")),
                             rs.getString(columnOrdinalMap.get("version")) != null ? MigrationVersion.fromVersion(rs.getString(columnOrdinalMap.get("version"))) : null,
-                            rs.getString(columnOrdinalMap.get("description")),
+                            parseDescription(rs.getString(columnOrdinalMap.get("description"))),
                             MigrationType.valueOf(type),
                             rs.getString(columnOrdinalMap.get("script")),
                             checksum,
@@ -234,6 +236,18 @@ class JdbcTableSchemaHistory extends SchemaHistory {
             throw new FlywaySqlException("Error while retrieving the list of applied migrations from Schema History table "
                     + table, e);
         }
+    }
+
+
+    private JSONObject parseDescription(String description) {
+
+        JSONObject result = null;
+        try {
+            result = new JSONObject(description);
+        } catch (JSONException e) {
+            result = new JSONObject(Collections.singletonMap(AppliedMigrationExtensions.DESCRIPTION.getKey(), description));
+        }
+        return result;
     }
 
     private HashMap<String, Integer> constructColumnOrdinalMap(ResultSet rs) throws SQLException {
@@ -273,7 +287,7 @@ class JdbcTableSchemaHistory extends SchemaHistory {
                         " WHERE " + database.quote("success") + " = " + database.getBooleanFalse() + " AND " +
                         (appliedMigration.getVersion() != null ?
                         database.quote("version") + " = '" + appliedMigration.getVersion().getVersion() + "'" :
-                        database.quote("description") + " = '" + appliedMigration.getDescription() + "'"));
+                        database.quote("description") + " = '" + appliedMigration.getExtension() + "'"));
             }
 
             clearCache();
@@ -319,6 +333,14 @@ class JdbcTableSchemaHistory extends SchemaHistory {
 
         Object checksumObj = checksum == null ? JdbcNullTypes.IntegerNull : checksum;
 
+        final JSONObject clonedExtension;
+        try {
+            clonedExtension = new JSONObject(appliedMigration.getExtensionObject(), JSONObject.getNames(appliedMigration.getExtensionObject()));
+            clonedExtension.put(AppliedMigrationExtensions.DESCRIPTION.getKey(), description);
+        } catch (JSONException e) {
+            throw new IllegalStateException("Could not update description");
+        }
+
         try {
             jdbcTemplate.update("UPDATE " + table
                                 + " SET "
@@ -326,7 +348,7 @@ class JdbcTableSchemaHistory extends SchemaHistory {
                                 + database.quote("type") + "=? , "
                                 + database.quote("checksum") + "=?"
                                 + " WHERE " + database.quote("installed_rank") + "=?",
-                    description, type.name(), checksumObj, appliedMigration.getInstalledRank());
+                    clonedExtension.toString(), type.name(), checksumObj, appliedMigration.getInstalledRank());
         } catch (SQLException e) {
             throw new FlywaySqlException("Unable to repair Schema History table " + table
                     + " for version " + version, e);
@@ -354,7 +376,7 @@ class JdbcTableSchemaHistory extends SchemaHistory {
         try {
             jdbcTemplate.update(database.getInsertStatement(table),
                     calculateInstalledRank(),
-                    versionObj, appliedMigration.getDescription(), "DELETE", appliedMigration.getScript(),
+                    versionObj, appliedMigration.getExtension(), "DELETE", appliedMigration.getScript(),
                     checksumObj, database.getInstalledBy(), 0, appliedMigration.isSuccess());
         } catch (SQLException e) {
             throw new FlywaySqlException("Unable to repair Schema History table " + table

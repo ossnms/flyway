@@ -28,6 +28,7 @@ import org.flywaydb.core.api.output.OperationResult;
 import org.flywaydb.core.internal.database.base.Database;
 import org.flywaydb.core.internal.database.base.Schema;
 import org.flywaydb.core.internal.schemahistory.AppliedMigration;
+import org.flywaydb.core.internal.schemahistory.AppliedMigrationExtensions;
 import org.flywaydb.core.internal.schemahistory.SchemaHistory;
 import org.flywaydb.core.internal.util.Pair;
 
@@ -597,13 +598,30 @@ public class MigrationInfoServiceImpl implements MigrationInfoService, Operation
     public List<ValidateOutput> validate() {
         List<ValidateOutput> invalidMigrations = new ArrayList<>();
 
+        final Optional<MigrationVersion> ignorePast = getLatestIgnorePastMigrationVersion();
+
+
         for (MigrationInfoImpl migrationInfo : migrationInfos) {
+            if (ignorePast.isPresent() && ignorePast.get().compareTo(migrationInfo.getVersion()) >= 0) {
+               continue;
+            }
             ErrorDetails validateError = migrationInfo.validate();
             if (validateError != null) {
                 invalidMigrations.add(CommandResultFactory.createValidateOutput(migrationInfo, validateError));
             }
         }
         return invalidMigrations;
+    }
+
+    private Optional<MigrationVersion> getLatestIgnorePastMigrationVersion() {
+        final Optional<MigrationVersion> ignorePast = migrationInfos.stream()
+                .filter(migrationInfo -> migrationInfo.getAppliedMigration() != null)
+                .map(MigrationInfoImpl::getAppliedMigration)
+                .filter(appliedMigration -> appliedMigration.getExtensionObject().optBoolean(AppliedMigrationExtensions.IGNORE_PAST.getKey(), false))
+                .sorted(Comparator.reverseOrder())
+                .map(AppliedMigration::getVersion)
+                .findFirst();
+        return ignorePast;
     }
 
     public void setAllSchemasEmpty(Schema[] schemas) {

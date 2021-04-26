@@ -19,9 +19,12 @@ import org.flywaydb.core.api.*;
 import org.flywaydb.core.api.resolver.ResolvedMigration;
 import org.flywaydb.core.internal.resolver.ResolvedMigrationImpl;
 import org.flywaydb.core.internal.schemahistory.AppliedMigration;
+import org.flywaydb.core.internal.schemahistory.AppliedMigrationExtensions;
 import org.flywaydb.core.internal.schemahistory.SchemaHistory;
 import org.flywaydb.core.internal.util.AbbreviationUtils;
+import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -139,6 +142,15 @@ public class MigrationInfoImpl implements MigrationInfo {
             return appliedMigration.getDescription();
         }
         return resolvedMigration.getDescription();
+    }
+
+    @Override
+    public String getExtension() {
+        if (appliedMigration != null) {
+            return appliedMigration.getExtension();
+        }
+
+        return new JSONObject(Collections.singletonMap(AppliedMigrationExtensions.DESCRIPTION.getKey(), resolvedMigration.getDescription())).toString();
     }
 
     @Override

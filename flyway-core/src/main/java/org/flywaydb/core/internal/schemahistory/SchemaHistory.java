@@ -24,7 +24,9 @@ import org.flywaydb.core.internal.database.base.Schema;
 import org.flywaydb.core.internal.database.base.Table;
 import org.flywaydb.core.internal.util.AbbreviationUtils;
 import org.flywaydb.core.internal.util.StringUtils;
+import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -121,7 +123,7 @@ public abstract class SchemaHistory {
      * @param schemas The schemas that were created by Flyway.
      */
     public final void addSchemasMarker(Schema[] schemas) {
-        addAppliedMigration(null, "<< Flyway Schema Creation >>",
+        addAppliedMigration(null, new JSONObject(Collections.singletonMap(AppliedMigrationExtensions.DESCRIPTION.getKey(), "<< Flyway Schema Creation >>")).toString(),
                 MigrationType.SCHEMA, StringUtils.arrayToCommaDelimitedString(schemas), null, 0, true);
     }
 
@@ -174,7 +176,8 @@ public abstract class SchemaHistory {
         doAddAppliedMigration(
                 installedRank,
                 version,
-                AbbreviationUtils.abbreviateDescription(description),
+                description,
+//                AbbreviationUtils.abbreviateDescription(description),
                 type,
                 AbbreviationUtils.abbreviateScript(script),
                 checksum,

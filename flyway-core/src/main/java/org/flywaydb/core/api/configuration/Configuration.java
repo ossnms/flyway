@@ -615,4 +615,7 @@ public interface Configuration {
      * @return A list of paths to secrets in Vault
      */
     String[] getVaultSecrets();
+
+
+    boolean isIgnorePastAfterMigration();
 }

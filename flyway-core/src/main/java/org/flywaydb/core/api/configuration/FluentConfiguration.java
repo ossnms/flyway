@@ -1298,4 +1298,17 @@ public class FluentConfiguration implements Configuration {
         config.configureUsingEnvVars();
         return this;
     }
+
+
+    @Override
+    public boolean isIgnorePastAfterMigration() {
+        return config.isIgnorePastAfterMigration();
+    }
+
+
+    public FluentConfiguration ignorePastAfterMigration(boolean ignore) {
+        config.setIgnorePastAfterMigration(ignore);
+        return this;
+    }
+
 }

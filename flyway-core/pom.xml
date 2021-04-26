@@ -27,6 +27,12 @@
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
     <dependencies>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20210307</version>
+            <optional>true</optional>
+        </dependency>
         <!-- Optional loggers -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -43,6 +49,7 @@
             <artifactId>log4j-api</artifactId>
             <optional>true</optional>
         </dependency>
+
         <!-- Others -->
         <dependency>
             <groupId>org.jboss</groupId>
@@ -317,6 +324,35 @@
                         <sourceFileInclude>**/core/api/**/*.java</sourceFileInclude>
                     </sourceFileIncludes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.json:json</include>
+                                </includes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.json</pattern>
+                                    <shadedPattern>org.flywaydb.json</shadedPattern>
+                                    <includes>
+                                        <include>org.json.*</include>
+                                    </includes>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

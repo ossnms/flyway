@@ -522,6 +522,9 @@ public class ClassicConfiguration implements Configuration {
      */
     private String[] vaultSecrets;
 
+
+    private boolean ignorePastAfterMigration;
+
     private final ClasspathClassScanner classScanner;
 
     public ClassicConfiguration() {
@@ -1812,6 +1815,16 @@ public class ClassicConfiguration implements Configuration {
 
     }
 
+
+    @Override
+    public boolean isIgnorePastAfterMigration() {
+        return ignorePastAfterMigration;
+    }
+
+    public void setIgnorePastAfterMigration(boolean ignore) {
+        this.ignorePastAfterMigration = ignore;
+    }
+
     public void setResourceProvider(ResourceProvider resourceProvider) {
         this.resourceProvider = resourceProvider;
     }
@@ -1920,6 +1933,7 @@ public class ClassicConfiguration implements Configuration {
         setJavaMigrationClassProvider(configuration.getJavaMigrationClassProvider());
         setShouldCreateSchemas(configuration.getCreateSchemas());
         setLockRetryCount(configuration.getLockRetryCount());
+        setIgnorePastAfterMigration(configuration.isIgnorePastAfterMigration());
 
         url = configuration.getUrl();
         user = configuration.getUser();
@@ -2202,6 +2216,13 @@ public class ClassicConfiguration implements Configuration {
         if (licenseKeyProp != null) {
             setLicenseKey(licenseKeyProp);
         }
+
+
+        String ignorePastAfterMigrationProp = props.remove(ConfigUtils.IGNORE_PAST_AFTER_MIGRATION_KEY);
+        if (ignorePastAfterMigrationProp != null) {
+            setIgnorePastAfterMigration(Boolean.valueOf(ignorePastAfterMigrationProp));
+        }
+
 
         // Must be done last, so that any driver-specific config has been done at this point.
         if (StringUtils.hasText(url) && (StringUtils.hasText(urlProp) ||
