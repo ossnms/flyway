@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.flywaydb</groupId>
         <artifactId>flyway-parent</artifactId>
-        <version>0-SNAPSHOT</version>
+        <version>7.7.3-ossnms-01-SNAPSHOT</version>
     </parent>
     <artifactId>flyway-commandline</artifactId>
     <packaging>jar</packaging>
@@ -269,44 +269,6 @@
                                     <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
                                 </configuration>
                             </execution>
-
-                            <execution>
-                                <id>copy-editions</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.flywaydb.enterprise</groupId>
-                                            <artifactId>flyway-commandline</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>jar</type>
-                                            <outputDirectory>${project.build.directory}/editions/enterprise</outputDirectory>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.flywaydb.enterprise</groupId>
-                                            <artifactId>flyway-core</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>jar</type>
-                                            <outputDirectory>${project.build.directory}/editions/enterprise</outputDirectory>
-                                        </artifactItem>
-                                    </artifactItems>
-                                </configuration>
-                            </execution>
-
-
-
-
-
-
-
-
-
-
-
-
 
 
                         </executions>
