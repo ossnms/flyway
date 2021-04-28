@@ -65,6 +65,15 @@ public class CommandResultFactory {
                 String.join(", ", configuration.getSchemas()));
     }
 
+    public static ExecuteScriptResult createExecuteScriptResult(String databaseName, Configuration configuration) {
+        String flywayVersion = VersionPrinter.getVersion();
+
+        return new ExecuteScriptResult(
+                flywayVersion,
+                databaseName,
+                String.join(", ", configuration.getSchemas()));
+    }
+
     public static CleanResult createCleanResult(String databaseName) {
         String flywayVersion = VersionPrinter.getVersion();
         return new CleanResult(flywayVersion, databaseName);

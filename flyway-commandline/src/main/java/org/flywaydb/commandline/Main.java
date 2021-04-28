@@ -251,6 +251,8 @@ public class Main {
             LOG.info(MigrationInfoDumper.dumpToAsciiTable(infos));
         } else if ("repair".equals(operation)) {
             result = flyway.repair();
+        } else if ("execute".equals(operation)) {
+            result = flyway.execute();
         } else {
             LOG.error("Invalid operation: " + operation);
             printUsage();

@@ -103,7 +103,8 @@ class CommandLineArguments {
             "validate",
             "undo",
             "baseline",
-            "repair"
+            "repair",
+            "execute"
     );
 
     private final String[] args;

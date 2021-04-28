@@ -32,5 +32,6 @@ public class FlywayPlugin implements Plugin<Project> {
         project.getTasks().create("flywayValidate", FlywayValidateTask.class);
         project.getTasks().create("flywayInfo", FlywayInfoTask.class);
         project.getTasks().create("flywayRepair", FlywayRepairTask.class);
+        project.getTasks().create("flywayExecute", FlywayExecuteTask.class);
     }
 }

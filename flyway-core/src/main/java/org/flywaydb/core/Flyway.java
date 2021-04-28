@@ -15,8 +15,10 @@
  */
 package org.flywaydb.core;
 
+import org.flywaydb.core.api.ClassProvider;
 import org.flywaydb.core.api.FlywayException;
 import org.flywaydb.core.api.MigrationInfoService;
+import org.flywaydb.core.api.ResourceProvider;
 import org.flywaydb.core.api.callback.Callback;
 import org.flywaydb.core.api.callback.Event;
 import org.flywaydb.core.api.configuration.ClassicConfiguration;
@@ -26,14 +28,28 @@ import org.flywaydb.core.api.exception.FlywayValidateException;
 import org.flywaydb.core.api.logging.Log;
 import org.flywaydb.core.api.logging.LogFactory;
 import org.flywaydb.core.api.migration.JavaMigration;
-import org.flywaydb.core.api.output.*;
+import org.flywaydb.core.api.output.BaselineResult;
+import org.flywaydb.core.api.output.CleanResult;
+import org.flywaydb.core.api.output.ExecuteScriptResult;
+import org.flywaydb.core.api.output.MigrateResult;
+import org.flywaydb.core.api.output.RepairResult;
+import org.flywaydb.core.api.output.UndoResult;
+import org.flywaydb.core.api.output.ValidateResult;
 import org.flywaydb.core.api.resolver.MigrationResolver;
-import org.flywaydb.core.internal.callback.*;
-import org.flywaydb.core.api.ClassProvider;
+import org.flywaydb.core.internal.callback.CallbackExecutor;
+import org.flywaydb.core.internal.callback.DefaultCallbackExecutor;
+import org.flywaydb.core.internal.callback.NoopCallbackExecutor;
+import org.flywaydb.core.internal.callback.SqlScriptCallbackFactory;
 import org.flywaydb.core.internal.clazz.NoopClassProvider;
-import org.flywaydb.core.internal.command.*;
+import org.flywaydb.core.internal.command.DbBaseline;
+import org.flywaydb.core.internal.command.DbClean;
+import org.flywaydb.core.internal.command.DbExecuteScript;
+import org.flywaydb.core.internal.command.DbInfo;
+import org.flywaydb.core.internal.command.DbMigrate;
+import org.flywaydb.core.internal.command.DbRepair;
+import org.flywaydb.core.internal.command.DbSchemas;
+import org.flywaydb.core.internal.command.DbValidate;
 import org.flywaydb.core.internal.configuration.ConfigurationValidator;
-import org.flywaydb.core.internal.strategy.RetryStrategy;
 import org.flywaydb.core.internal.database.base.Database;
 import org.flywaydb.core.internal.database.base.DatabaseType;
 import org.flywaydb.core.internal.database.base.Schema;
@@ -42,9 +58,9 @@ import org.flywaydb.core.internal.jdbc.StatementInterceptor;
 import org.flywaydb.core.internal.license.VersionPrinter;
 import org.flywaydb.core.internal.parser.ParsingContext;
 import org.flywaydb.core.internal.resolver.CompositeMigrationResolver;
-
-import org.flywaydb.core.internal.resource.*;
-import org.flywaydb.core.api.ResourceProvider;
+import org.flywaydb.core.internal.resource.NoopResourceProvider;
+import org.flywaydb.core.internal.resource.ResourceNameValidator;
+import org.flywaydb.core.internal.resource.StringResource;
 import org.flywaydb.core.internal.scanner.LocationScannerCache;
 import org.flywaydb.core.internal.scanner.ResourceNameCache;
 import org.flywaydb.core.internal.scanner.Scanner;
@@ -53,12 +69,15 @@ import org.flywaydb.core.internal.schemahistory.SchemaHistoryFactory;
 import org.flywaydb.core.internal.sqlscript.SqlScript;
 import org.flywaydb.core.internal.sqlscript.SqlScriptExecutorFactory;
 import org.flywaydb.core.internal.sqlscript.SqlScriptFactory;
+import org.flywaydb.core.internal.strategy.RetryStrategy;
 import org.flywaydb.core.internal.util.IOUtils;
 import org.flywaydb.core.internal.util.Pair;
 import org.flywaydb.core.internal.util.StringUtils;
 
 import java.sql.Connection;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This is the centre point of Flyway, and for most users, the only class they will ever have to deal with.
@@ -446,6 +465,16 @@ public class Flyway {
             }
         }, true);
     }
+
+    public ExecuteScriptResult execute() throws FlywayException {
+        return execute(new Command<ExecuteScriptResult>() {
+            @Override
+            public ExecuteScriptResult execute(MigrationResolver migrationResolver, SchemaHistory schemaHistory, Database database, Schema[] schemas, CallbackExecutor callbackExecutor, StatementInterceptor statementInterceptor) {
+                return new DbExecuteScript(database, schemas[0], migrationResolver, configuration, m -> true).executeScript();
+            }
+        }, true);
+    }
+
 
     /**
      * Creates the MigrationResolver.
