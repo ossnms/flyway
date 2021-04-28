@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.flywaydb</groupId>
         <artifactId>flyway-parent</artifactId>
-        <version>7.7.3-ossnms-02</version>
+        <version>7.7.3-ossnms-03-SNAPSHOT</version>
     </parent>
     <artifactId>flyway-core</artifactId>
     <packaging>jar</packaging>
