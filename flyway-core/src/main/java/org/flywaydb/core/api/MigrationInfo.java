@@ -15,6 +15,8 @@
  */
 package org.flywaydb.core.api;
 
+import org.json.JSONObject;
+
 import java.util.Date;
 
 /**
@@ -41,7 +43,7 @@ public interface MigrationInfo extends Comparable<MigrationInfo> {
      */
     String getDescription();
 
-    String getExtension();
+    JSONObject getExtension();
 
     /**
      * @return The name of the script to execute for this migration, relative to its classpath or filesystem location.

@@ -145,13 +145,15 @@ public class MigrationInfoImpl implements MigrationInfo {
     }
 
     @Override
-    public String getExtension() {
+    public JSONObject getExtension() {
         if (appliedMigration != null) {
-            return appliedMigration.getExtension();
+            return appliedMigration.getExtensionObject();
         }
-
-        return new JSONObject(Collections.singletonMap(AppliedMigrationExtensions.DESCRIPTION.getKey(), resolvedMigration.getDescription())).toString();
+        return new JSONObject(Collections.singletonMap(AppliedMigrationExtensions.DESCRIPTION.getKey(), resolvedMigration.getDescription()));
     }
+
+
+
 
     @Override
     public String getScript() {

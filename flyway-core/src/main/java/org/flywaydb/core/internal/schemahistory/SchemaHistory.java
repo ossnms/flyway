@@ -123,7 +123,7 @@ public abstract class SchemaHistory {
      * @param schemas The schemas that were created by Flyway.
      */
     public final void addSchemasMarker(Schema[] schemas) {
-        addAppliedMigration(null, new JSONObject(Collections.singletonMap(AppliedMigrationExtensions.DESCRIPTION.getKey(), "<< Flyway Schema Creation >>")).toString(),
+        addAppliedMigration(null, "<< Flyway Schema Creation >>",
                 MigrationType.SCHEMA, StringUtils.arrayToCommaDelimitedString(schemas), null, 0, true);
     }
 
@@ -172,12 +172,24 @@ public abstract class SchemaHistory {
      */
     public final void addAppliedMigration(MigrationVersion version, String description, MigrationType type,
                                           String script, Integer checksum, int executionTime, boolean success) {
+        addAppliedMigration(
+                version,
+                new JSONObject(Collections.singletonMap(AppliedMigrationExtensions.DESCRIPTION.getKey(), description)),
+                type,
+                script,
+                checksum,
+                executionTime,
+                success);
+    }
+
+
+    public final void addAppliedMigration(MigrationVersion version, JSONObject extension, MigrationType type,
+                                          String script, Integer checksum, int executionTime, boolean success) {
         int installedRank = type == MigrationType.SCHEMA ? 0 : calculateInstalledRank();
         doAddAppliedMigration(
                 installedRank,
                 version,
-                description,
-//                AbbreviationUtils.abbreviateDescription(description),
+                AbbreviationUtils.abbreviateExtension(extension),
                 type,
                 AbbreviationUtils.abbreviateScript(script),
                 checksum,

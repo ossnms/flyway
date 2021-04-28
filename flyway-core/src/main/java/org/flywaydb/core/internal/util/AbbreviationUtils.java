@@ -15,6 +15,11 @@
  */
 package org.flywaydb.core.internal.util;
 
+import org.flywaydb.core.internal.schemahistory.AppliedMigrationExtensions;
+import org.json.JSONObject;
+
+import java.util.Arrays;
+
 /**
  * Various abbreviation-related utilities.
  */
@@ -60,5 +65,31 @@ public class AbbreviationUtils {
         }
 
         return "..." + script.substring(3, 1000);
+    }
+
+
+    public static String abbreviateExtension(JSONObject extension) {
+        if (extension == null) {
+            return null;
+        }
+
+        if (extension.toString().length() <= 200) {
+            return extension.toString();
+        }
+
+        final String[] names = Arrays.stream(JSONObject.getNames(extension))
+                .filter(v -> !v.equalsIgnoreCase(AppliedMigrationExtensions.DESCRIPTION.getKey()))
+                .toArray(String[]::new);
+        final JSONObject result = new JSONObject(extension, names);
+        result.putOpt(AppliedMigrationExtensions.DESCRIPTION.getKey(), "");
+        final int lengthWithoutDescription = result.toString().length();
+        if (lengthWithoutDescription > 197) {
+            throw new IllegalArgumentException("Too long even without description");
+        }
+
+        final String trimmedDesc = extension.optString(AppliedMigrationExtensions.DESCRIPTION.getKey()).substring(0, 197 - lengthWithoutDescription) + "...";
+        result.putOpt(AppliedMigrationExtensions.DESCRIPTION.getKey(), trimmedDesc);
+
+        return result.toString();
     }
 }
