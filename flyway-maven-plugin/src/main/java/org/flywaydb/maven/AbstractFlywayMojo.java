@@ -619,6 +619,13 @@ abstract class AbstractFlywayMojo extends AbstractMojo {
     @Parameter(property = ConfigUtils.CREATE_SCHEMAS)
     private Boolean createSchemas;
 
+
+    @Parameter(property = ConfigUtils.IGNORE_PAST_AFTER_MIGRATION_KEY)
+    private Boolean ignorePastAfterMigration;
+
+    @Parameter(property = ConfigUtils.ERROR_ON_NOT_FOUND_KEY)
+    private Boolean errorOnNotFound;
+
     /**
      * The working directory to consider when dealing with relative paths for both config files and locations.
      * (default: basedir, the directory where the POM resides)
@@ -809,6 +816,8 @@ abstract class AbstractFlywayMojo extends AbstractMojo {
             putIfSet(conf, ConfigUtils.VALIDATE_ON_MIGRATE, validateOnMigrate);
             putIfSet(conf, ConfigUtils.DRIVER, driver);
             putIfSet(conf, ConfigUtils.CREATE_SCHEMAS, createSchemas);
+            putIfSet(conf, ConfigUtils.IGNORE_PAST_AFTER_MIGRATION_KEY, ignorePastAfterMigration);
+            putIfSet(conf, ConfigUtils.ERROR_ON_NOT_FOUND_KEY, errorOnNotFound);
 
             putArrayIfSet(conf, ConfigUtils.ERROR_OVERRIDES, errorOverrides);
             putIfSet(conf, ConfigUtils.DRYRUN_OUTPUT, dryRunOutput);

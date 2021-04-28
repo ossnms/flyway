@@ -618,4 +618,6 @@ public interface Configuration {
 
 
     boolean isIgnorePastAfterMigration();
+
+    boolean isErrorOnNotFound();
 }

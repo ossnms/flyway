@@ -25,7 +25,6 @@ import org.flywaydb.core.internal.license.FlywayTeamsUpgradeRequiredException;
 import org.flywaydb.core.internal.scanner.android.AndroidScanner;
 import org.flywaydb.core.internal.scanner.classpath.ClassPathScanner;
 import org.flywaydb.core.internal.scanner.classpath.ResourceAndClassScanner;
-import org.flywaydb.core.internal.scanner.cloud.gcs.GCSScanner;
 import org.flywaydb.core.internal.scanner.cloud.s3.AwsS3Scanner;
 import org.flywaydb.core.internal.scanner.filesystem.FileSystemScanner;
 import org.flywaydb.core.internal.util.FeatureDetector;
@@ -53,8 +52,8 @@ public class Scanner<I> implements ResourceProvider, ClassProvider<I> {
      */
     public Scanner(Class<I> implementedInterface, Collection<Location> locations, ClassLoader classLoader, Charset encoding,
                    boolean stream,
-                   ResourceNameCache resourceNameCache, LocationScannerCache locationScannerCache
-    ) {
+                   ResourceNameCache resourceNameCache, LocationScannerCache locationScannerCache,
+                   boolean errorOnNotFound) {
         FileSystemScanner fileSystemScanner = new FileSystemScanner(encoding, stream);
 
         FeatureDetector detector =  new FeatureDetector(classLoader);
@@ -90,7 +89,7 @@ public class Scanner<I> implements ResourceProvider, ClassProvider<I> {
             } else {
                 ResourceAndClassScanner<I> resourceAndClassScanner = android
                         ? new AndroidScanner<>(implementedInterface, classLoader, encoding, location)
-                        : new ClassPathScanner<>(implementedInterface, classLoader, encoding, location, resourceNameCache, locationScannerCache);
+                        : new ClassPathScanner<>(implementedInterface, classLoader, encoding, location, resourceNameCache, locationScannerCache, errorOnNotFound);
                 resources.addAll(resourceAndClassScanner.scanForResources());
                 classes.addAll(resourceAndClassScanner.scanForClasses());
             }

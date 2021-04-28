@@ -524,8 +524,10 @@ public class ClassicConfiguration implements Configuration {
 
 
     private boolean ignorePastAfterMigration;
+    private boolean errorOnNotFound = true;
 
     private final ClasspathClassScanner classScanner;
+
 
     public ClassicConfiguration() {
         classScanner = new ClasspathClassScanner(this.classLoader);
@@ -1825,6 +1827,15 @@ public class ClassicConfiguration implements Configuration {
         this.ignorePastAfterMigration = ignore;
     }
 
+    @Override
+    public boolean isErrorOnNotFound() {
+        return errorOnNotFound;
+    }
+
+    public void setErrorOnNotFound(boolean errorOnNotFound) {
+        this.errorOnNotFound = errorOnNotFound;
+    }
+
     public void setResourceProvider(ResourceProvider resourceProvider) {
         this.resourceProvider = resourceProvider;
     }
@@ -1934,6 +1945,7 @@ public class ClassicConfiguration implements Configuration {
         setShouldCreateSchemas(configuration.getCreateSchemas());
         setLockRetryCount(configuration.getLockRetryCount());
         setIgnorePastAfterMigration(configuration.isIgnorePastAfterMigration());
+        setErrorOnNotFound(configuration.isErrorOnNotFound());
 
         url = configuration.getUrl();
         user = configuration.getUser();
@@ -2221,6 +2233,11 @@ public class ClassicConfiguration implements Configuration {
         String ignorePastAfterMigrationProp = props.remove(ConfigUtils.IGNORE_PAST_AFTER_MIGRATION_KEY);
         if (ignorePastAfterMigrationProp != null) {
             setIgnorePastAfterMigration(Boolean.valueOf(ignorePastAfterMigrationProp));
+        }
+
+        String errorOnNotFoundProp = props.remove(ConfigUtils.ERROR_ON_NOT_FOUND_KEY);
+        if (errorOnNotFoundProp != null) {
+            setErrorOnNotFound(Boolean.valueOf(errorOnNotFoundProp));
         }
 
 

@@ -90,6 +90,7 @@ public class ConfigUtils {
     public static final String VALIDATE_MIGRATION_NAMING = "flyway.validateMigrationNaming";
     public static final String CREATE_SCHEMAS = "flyway.createSchemas";
     public static final String IGNORE_PAST_AFTER_MIGRATION_KEY = "flyway.ignorePastAfterMigration";
+    public static final String ERROR_ON_NOT_FOUND_KEY = "flyway.errorOnNotFound";
 
     // Secrets-manager specific
     public static final String VAULT_URL = "flyway.vault.url";

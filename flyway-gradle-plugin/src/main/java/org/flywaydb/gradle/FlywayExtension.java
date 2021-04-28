@@ -504,6 +504,10 @@ public class FlywayExtension {
      */
     public Boolean createSchemas;
 
+    public Boolean ignorePastAfterMigration;
+
+    public Boolean errorOnNotFound;
+
     /**
      * The REST API URL of your Vault server, including the API version.
      * Currently only supports API version v1.

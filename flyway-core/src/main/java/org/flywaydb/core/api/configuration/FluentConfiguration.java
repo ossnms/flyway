@@ -1311,4 +1311,14 @@ public class FluentConfiguration implements Configuration {
         return this;
     }
 
+    @Override
+    public boolean isErrorOnNotFound() {
+        return config.isErrorOnNotFound();
+    }
+
+    public FluentConfiguration errorOnNotFound(boolean value) {
+        config.setErrorOnNotFound(value);
+        return this;
+    }
+
 }

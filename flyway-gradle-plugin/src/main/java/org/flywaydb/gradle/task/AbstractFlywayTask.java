@@ -131,6 +131,10 @@ public abstract class AbstractFlywayTask extends DefaultTask {
      */
     public Boolean createSchemas;
 
+    private Boolean ignorePastAfterMigration;
+
+    private Boolean errorOnNotFound;
+
     /**
      * The schemas managed by Flyway. These schema names are case-sensitive. If not specified, Flyway uses
      * the default schema for the database connection. If <i>defaultSchema</i> is not specified, then the first of
@@ -724,6 +728,8 @@ public abstract class AbstractFlywayTask extends DefaultTask {
         putIfSet(conf, ConfigUtils.SKIP_DEFAULT_CALLBACKS, skipDefaultCallbacks, extension.skipDefaultCallbacks);
         putIfSet(conf, ConfigUtils.DEFAULT_SCHEMA, defaultSchema, extension.defaultSchema);
         putIfSet(conf, ConfigUtils.CREATE_SCHEMAS, createSchemas, extension.createSchemas);
+        putIfSet(conf, ConfigUtils.IGNORE_PAST_AFTER_MIGRATION_KEY, ignorePastAfterMigration, extension.ignorePastAfterMigration);
+        putIfSet(conf, ConfigUtils.ERROR_ON_NOT_FOUND_KEY, errorOnNotFound, extension.errorOnNotFound);
 
         putIfSet(conf, ConfigUtils.SCHEMAS, StringUtils.arrayToCommaDelimitedString(schemas), StringUtils.arrayToCommaDelimitedString(extension.schemas));
         putIfSet(conf, ConfigUtils.RESOLVERS, StringUtils.arrayToCommaDelimitedString(resolvers), StringUtils.arrayToCommaDelimitedString(extension.resolvers));
